@@ -14,7 +14,11 @@ def show_mask(mask, ax, random_color=False):
         color = np.array([30/255, 144/255, 255/255, 0.6])
     h, w = mask.shape[-2:]
     mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
+    #축 제거 후 저장
     ax.imshow(mask_image)
+    ax.set_axis_off()
+    plt.savefig("mask.png", bbox_inches='tight', pad_inches = 0)
+    
     
 def show_points(coords, labels, ax, marker_size=375):
     pos_points = coords[labels==1]
@@ -30,11 +34,6 @@ def show_box(box, ax):
 """Get Image"""
 image = cv2.imread('images/truck.jpg')
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-plt.figure(figsize=(10,10))
-plt.imshow(image)
-plt.axis('on')
-plt.show()
 
 """SAM Model Loading"""
 sys.path.append("..")
@@ -73,8 +72,9 @@ masks, _, _ = predictor.predict(
 print(masks.shape)
 
 plt.figure(figsize=(10,10))
-plt.imshow(image)
+# plt.imshow(image)
 show_mask(masks, plt.gca())
-show_points(input_point, input_label, plt.gca())
+# show_points(input_point, input_label, plt.gca())
+
 plt.axis('off')
 plt.show() 
