@@ -38,7 +38,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 """SAM Model Loading"""
 sys.path.append("..")
 
-sam_checkpoint = "sam_vit_h_4b8939.pth"
+sam_checkpoint = "models/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
 device = "cuda"
