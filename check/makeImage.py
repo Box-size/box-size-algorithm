@@ -17,7 +17,7 @@ def show_mask(mask, ax, random_color=False):
     #축 제거 후 저장
     ax.imshow(mask_image)
     ax.set_axis_off()
-    plt.savefig("mask.png", bbox_inches='tight', pad_inches = 0)
+    plt.savefig("outputs/mask.png", bbox_inches='tight', pad_inches = 0)
     
     
 def show_points(coords, labels, ax, marker_size=375):
@@ -38,7 +38,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 """SAM Model Loading"""
 sys.path.append("..")
 
-sam_checkpoint = "sam_vit_h_4b8939.pth"
+sam_checkpoint = "models/sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
 device = "cuda"

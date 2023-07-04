@@ -1,0 +1,8 @@
+.venv
+
+*.pth
+
+__pycache__
+
+outputs/**
+!outputs/result-images-are-stored-here.txt
