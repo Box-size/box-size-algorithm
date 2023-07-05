@@ -37,3 +37,7 @@ $ pip install -r requirements.txt
 > `sam_vit_h_4b8939.pth` is a model provided by Facebook Research.
 
 </details>
+#YOLO폴더
+- YOLO v5를 이용한 박스 이미지만 추출하는 코드
+- 모델 안정성 개선 필요
+- detect.py 코드 실행을 통해 구동
