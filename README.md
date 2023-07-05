@@ -1,7 +1,5 @@
 # box-size-algorithm
 
-<<<<<<< HEAD
-<<<<<<< dev
 사진에서 박스를 탐색하고, 실제 박스의 가로, 세로, 높이를 계산합니다.
 
 > CJ대한통운 미래기술 챌린지 2023(Box.size 팀)
@@ -39,12 +37,15 @@ $ pip install -r requirements.txt
 > `sam_vit_h_4b8939.pth` is a model provided by Facebook Research.
 
 </details>
-=======
-- YOLO v5를 이용한 박스 이미지만 추출하는 코드
-- 모델 안정성 개선 필요
->>>>>>> YOLOv5 첫 모델
-=======
-- YOLO v5를 이용한 박스 이미지만 추출하는 코드
-- 모델 안정성 개선 필요
-- detect.py 코드 실행을 통해 구동
->>>>>>> YOLOv5
+
+## YOLO v5
+
+### Detail
+
+```sh
+$ python yolo/detect.py
+```
+
+YOLO v5를 이용한 박스 이미지만 추출하는 코드
+
+추출된 이미지는 /result/exp/crops 에 있습니다.
