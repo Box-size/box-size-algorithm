@@ -26,25 +26,31 @@ if __name__ == '__main__':
             os.makedirs(CROP_PATH)
     # PATH 세팅 끝
 
-    #이미지를 읽어와서 배경 제거, 이때 배경은 흰색으로 씌우기
-    input = cv2.imread(INPUT_PATH)
+    #이미지를 GRAY SCALE로 읽기
+    input = cv2.imread(INPUT_PATH, 0)
     
+    # 배경 제거, 이때 배경은 검정
     output = remove(input,
-        alpha_matting=True,
-        bgcolor=[0,0,0,0])
-
-    cv2.imwrite(OUTPUT_PATH, output)
-    #배경이 제거된 이미지만 결과 출력
-    cv2.imshow('what', output)
-
-    #배경이 제거된 이미지 grayscale
-    img = cv2.imread(OUTPUT_PATH, cv2.IMREAD_GRAYSCALE)
-    cv2.imshow('src', img)
+        bgcolor=[0,0,0, 255])
     
-    #Canny를 통해 외곽선만 검출(threshold는 통상적인 값, 추후 실험을 통해 변경 필요)
-    nuki = cv2.Canny(img, 10, 150)
+    # 배경 제거 결과 출력
+    cv2.imwrite(OUTPUT_PATH, output)
+    cv2.imshow('what', output)
+    
+    # Canny를 통해 외곽선만 검출(threshold는 통상적인 값, 추후 실험을 통해 변경 필요)
+    # 이미지, Threshold1: 작을 수록 선이 조금더 길게 나옴, Threshold2: 작을 수록 선이 더 많이 검출됨
+    nuki = cv2.Canny(output, 100, 200)
 
-    cv2.imwrite(CROP_PATH, nuki)
+    # nuki 결과 출력
+    
     cv2.imshow('nuki', nuki)
+
+    # morphology를 위한 kernel 제작 nxn의 kernel로 사각형(MORPH_RECT), 즉 커널이 전부 1로 채워짐
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+    # 커널을 사용해 MORPH_CLOSE -> 커널에 맞게 주변 픽셀 다 선택해서 채우기 때문에 선이 두꺼워진다.
+    morhpology = cv2.morphologyEx(nuki, cv2.MORPH_CLOSE, kernel)
+
+    cv2.imwrite(CROP_PATH, morhpology)
+    cv2.imshow('morphology', morhpology)
 
     cv2.waitKey()
