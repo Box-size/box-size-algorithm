@@ -49,3 +49,17 @@ $ python yolo/detect.py
 YOLO v5를 이용한 박스 이미지만 추출하는 코드
 
 추출된 이미지는 /result/exp/crops 에 있습니다.
+
+## nuki
+
+### Detail
+
+```sh
+$ python nuki/rem2can.py
+```
+
+YOLO v5를 이용해 추출된 이미지를 
+rembg라이브러리를 이용해 배경을 제거하고 
+Canny메소드를 이용해 외곽선만 검출한 코드
+
+추출된 이미지는 nuki/crops 에 있습니다.
