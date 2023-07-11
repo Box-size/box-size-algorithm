@@ -63,3 +63,24 @@ rembg라이브러리를 이용해 배경을 제거하고
 Canny메소드를 이용해 외곽선만 검출한 코드
 
 추출된 이미지는 nuki/crops 에 있습니다.
+
+## nuki
+
+### Install Module
+
+```sh
+$ pip install -U ultralytics
+```
+
+### Run
+
+```sh
+$ yolo predict model=detect_model.pt imgsz=640 conf=0.5 source=images save_crop=True
+```
+conf 조절을 통해 특정 confidence 값 이상만 추출하도록 할 수 있습니다.
+
+### detail
+
+검출 결과는 yolo-v8/runs/detect/predict에 있고,
+박스만 추출된 파일은 yolo-v8/runs/detect/predict/crops/0 에 있습니다.
+
