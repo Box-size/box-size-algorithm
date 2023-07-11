@@ -82,5 +82,9 @@ conf 조절을 통해 특정 confidence 값 이상만 추출하도록 할 수 �
 ### detail
 
 검출 결과는 yolo-v8/runs/detect/predict에 있고,
+
 박스만 추출된 파일은 yolo-v8/runs/detect/predict/crops/0 에 있습니다.
 
+YOLO v8 커스텀 모델 학습.ipynb파일로 jupyter notebook을 통해 
+
+직접 YOLO v8 모델 학습도 가능 합니다.
