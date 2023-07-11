@@ -64,7 +64,7 @@ Canny메소드를 이용해 외곽선만 검출한 코드
 
 추출된 이미지는 nuki/crops 에 있습니다.
 
-## nuki
+## YOLO v8
 
 ### Install Module
 
