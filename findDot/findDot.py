@@ -1,8 +1,9 @@
-import cv2
+import cv2, os
 import numpy as np
 import matplotlib.pyplot as plt
 
-input_path = 'findDot/crops/crop4.png'
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+input_path = os.path.join(FILE_DIR, 'crops/crop4.png')
 
 edges = cv2.imread(input_path)
 edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
