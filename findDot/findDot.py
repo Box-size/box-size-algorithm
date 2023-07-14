@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-input_path = 'crops/crop4.png'
+input_path = 'findDot/crops/crop4.png'
 
 edges = cv2.imread(input_path)
 edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
@@ -12,7 +12,7 @@ hexagon_contours = []
 
 # 육각형 윤곽선 필터링
 for contour in contours:
-    perimeter = cv2.arcLength(ㄹcontour, True)
+    perimeter = cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
     if len(approx) == 6:
         hexagon_contours.append(approx)
