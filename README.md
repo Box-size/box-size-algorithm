@@ -40,11 +40,13 @@ $ pip install -r requirements.txt
 
 ## YOLO v5
 
-### Detail
+### Run
 
 ```sh
 $ python yolo/detect.py
 ```
+
+### Detail
 
 YOLO v5를 이용한 박스 이미지만 추출하는 코드
 
@@ -52,11 +54,13 @@ YOLO v5를 이용한 박스 이미지만 추출하는 코드
 
 ## nuki
 
-### Detail
+### Run
 
 ```sh
 $ python nuki/rem2can.py
 ```
+
+### Detail
 
 YOLO v5를 이용해 추출된 이미지를 
 rembg라이브러리를 이용해 배경을 제거하고 
@@ -88,3 +92,19 @@ conf 조절을 통해 특정 confidence 값 이상만 추출하도록 할 수 �
 YOLO v8 커스텀 모델 학습.ipynb파일로 jupyter notebook을 통해 
 
 직접 YOLO v8 모델 학습도 가능 합니다.
+
+## findDot
+
+### Run
+
+```sh
+$ python findDot/findDot.py
+```
+
+### Detail
+
+nuki에서 얻어진 crops 폴더의 이미지를 바탕으로 박스 꼭지점 좌표를 알아내는 코드
+
+hexagon_contours에는 box 윤곽선의 배열이 저장(numpy)
+
+각 윤곽선의 좌표는 (x, y) 형태로 표현, 이미지 상에서 박스의 각 꼭지점 위치를 나타냄
