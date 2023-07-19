@@ -18,18 +18,38 @@ if __name__ == '__main__':
     INPUT_PATH = os.path.join(INPUT_DIR, INPUT_NAME)
     OUTPUT_PATH = os.path.join(OUTPUT_DIR, OUTPUT_NAME)
     CROP_PATH = os.path.join(CROP_DIR, CROP_NAME)
+    #NOTE: OUTPUT_PATH로 하면 디렉토리생성이 이미지 명으로 되고 얻어진 이미지가 저장이 안되어서 수정했습니다.
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-    if not os.path.exists(OUTPUT_PATH):
-        os.makedirs(OUTPUT_PATH)
-
-    if not os.path.exists(CROP_PATH):
-            os.makedirs(CROP_PATH)
+    if not os.path.exists(CROP_DIR):
+            os.makedirs(CROP_DIR)
     # PATH 세팅 끝
+
+    #원본 비율을 간직한 채 resize를 한 후, 남은 공간을 검은색으로 채우는 함수
+    #https://engineer-mole.tistory.com/314
+    def resize_ratio(pic):
+        size=(256, 256)
+        base_pic=np.zeros((size[1],size[0],3),np.uint8)
+        pic1=cv2.imread(pic,cv2.IMREAD_COLOR)
+        h,w=pic1.shape[:2]
+        ash=size[1]/h
+        asw=size[0]/w
+        if asw<ash:
+            sizeas=(int(w*asw),int(h*asw))
+        else:
+            sizeas=(int(w*ash),int(h*ash))
+        pic1 = cv2.resize(pic1,dsize=sizeas)
+        base_pic[int(size[1]/2-sizeas[1]/2):int(size[1]/2+sizeas[1]/2),
+        int(size[0]/2-sizeas[0]/2):int(size[0]/2+sizeas[0]/2),:]=pic1
+        return base_pic
 
     # 이미지를 GRAY SCALE로 읽기
     input = cv2.imread(INPUT_PATH, 0)
-    # TODO: 현재 crop 이미지가 정사각형으로 오는게 아니기 때문에 원본 비율을 기록해두거나 비율을 보존한 resize가 필요함
-    input = cv2.resize(input, (256,256))
+    # NOTE: 원본 비율 보존한 채 resize 해결했습니다.
+    input = resize_ratio(INPUT_PATH)
+    # resize_ratio 에서 IMREAD_COLOR로 불러왔기 때문에, 그레이 스케일 변경
+    input = cv2.cvtColor(input, cv2.COLOR_BGR2GRAY)
 
     # 명암비 alpha 0이면 그대로, 양수일수록 명암비가 커진다.
     alpha = 0.5
