@@ -7,12 +7,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def classify_points(points):
     # y 좌표가 가장 낮은 점을 찾아 맨 위 점으로 설정
-    top_point = min(points, key=lambda p: p[1])
-    points.remove(top_point)
+    top = min(points, key=lambda p: p[1])
+    points.remove(top)
 
     # y 좌표가 가장 높은 점을 찾아 맨 밑 점으로 설정
-    bottom_point = max(points, key=lambda p: p[1])
-    points.remove(bottom_point)
+    bottom = max(points, key=lambda p: p[1])
+    points.remove(bottom)
 
     # x 좌표가 가장 작은 두 점을 찾아 왼쪽 점으로 설정
     left_points = sorted(points, key=lambda p: p[0])[:2]
@@ -21,17 +21,20 @@ def classify_points(points):
 
     # 남은 두 점은 오른쪽 점으로 설정
     right_points = points
-    return top_point, bottom_point, left_points, right_points
+
+    # 각 왼쪽과 오른쪽의 점들을 높이에 따라 위쪽과 아래쪽으로 분류
+    left_top = min(left_points, key=lambda p: p[1])
+    left_bottom = max(left_points, key=lambda p: p[1])
+    right_top = min(right_points, key=lambda p: p[1])
+    right_bottom = max(right_points, key=lambda p: p[1])
+
+    return top, bottom, left_top, left_bottom, right_top, right_bottom
 
 
-def calc_pixel_w_h(top, left, right, bottom):
+def calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom):
     """
     이미지 좌표계 상의 가로, 세로, 높이를 추정하는 함수
     """
-    left_top = min(left, key=lambda p: p[1])
-    left_bottom = max(left, key=lambda p: p[1])
-    right_top = min(right, key=lambda p: p[1])
-    right_bottom = max(right, key=lambda p: p[1])
 
     width = (math.sqrt((top[0] - left_top[0])**2 + (top[1] - left_top[1])**2) +
              math.sqrt((bottom[0] - right_bottom[0])**2 + (bottom[1] - right_bottom[1])**2)) / 2
@@ -81,15 +84,10 @@ for x, y in points:
     plt.scatter(x, y, color='red', s=10)
 plt.show()
 
-top, bottom, left, right = classify_points(points)    
-
-left_top = min(left, key=lambda p: p[1])
-left_bottom = max(left, key=lambda p: p[1])
-right_top = min(right, key=lambda p: p[1])
-right_bottom = max(right, key=lambda p: p[1])
+top, bottom, left_top, left_bottom, right_top, right_bottom = classify_points(points)
 
 #이미지 꼭지점 좌표를 토대로 구한 가로, 세로, 높이
-width, height, tall = calc_pixel_w_h(top, left, right, bottom)
+width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
 #2D 이미지 좌표
 image_points = np.array([[bottom[0], bottom[1]],
                          [left_bottom[0], left_bottom[1]],
