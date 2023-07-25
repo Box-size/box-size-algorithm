@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import math
 from mpl_toolkits.mplot3d import Axes3D
 
-#함수 정의 구간//////////////////////////
+
 def classify_points(points):
     # y 좌표가 가장 낮은 점을 찾아 맨 위 점으로 설정
     top_point = min(points, key=lambda p: p[1])
@@ -22,8 +22,12 @@ def classify_points(points):
     # 남은 두 점은 오른쪽 점으로 설정
     right_points = points
     return top_point, bottom_point, left_points, right_points
-#이미지 좌표계 상의 가로, 세로, 높이를 추정하는 함수 
+
+
 def calc_pixel_w_h(top, left, right, bottom):
+    """
+    이미지 좌표계 상의 가로, 세로, 높이를 추정하는 함수
+    """
     left_top = min(left, key=lambda p: p[1])
     left_bottom = max(left, key=lambda p: p[1])
     right_top = min(right, key=lambda p: p[1])
@@ -38,35 +42,46 @@ def calc_pixel_w_h(top, left, right, bottom):
 
     return width, height, tall
 
-#//////////////////////////////////////
+
+def find_points_from_edges_image(edges):
+    """
+    윤곽선만 검출한 이미지에서 최대 점 6개를 가진 도형들의 꼭짓점들을 검출
+    """
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    hexagon_contours = []
+
+    # 육각형 윤곽선 필터링
+    for contour in contours:
+        perimeter = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+        if len(approx) <= 6:
+            hexagon_contours.append(approx)
+    
+    # 근사화된 윤곽선에서 각 꼭지점의 좌표 추출 및 표시
+    points = []
+    for hexagon in hexagon_contours:
+        for point in hexagon:
+            x, y = point[0]
+            
+            points.append((x, y))
+
+    return points
+
 input_path = 'findDot/crops/crop11.png'
 
 #윤곽선만 검출한 이미지 가져오기
 edges = cv2.imread(input_path)
 edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
 
-contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-hexagon_contours = []
+points = find_points_from_edges_image(edges)
 
-# 육각형 윤곽선 필터링
-for contour in contours:
-    perimeter = cv2.arcLength(contour, True)
-    approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
-    if len(approx) <= 6:
-        hexagon_contours.append(approx)
-
+# 찾은 점 시각화
 plt.imshow(edges)
+for x, y in points:
+    plt.scatter(x, y, color='red', s=10)
+plt.show()
 
-# 근사화된 윤곽선에서 각 꼭지점의 좌표 추출 및 표시
-points = []
-for hexagon in hexagon_contours:
-    for point in hexagon:
-        x, y = point[0]
-        plt.scatter(x, y, color='red', s=10)
-        points.append((x, y))
-       
-top, bottom, left, right = classify_points(points)
-plt.show()    
+top, bottom, left, right = classify_points(points)    
 
 left_top = min(left, key=lambda p: p[1])
 left_bottom = max(left, key=lambda p: p[1])
