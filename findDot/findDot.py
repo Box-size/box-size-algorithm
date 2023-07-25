@@ -135,6 +135,19 @@ def calculate_distance(rvec, tvec):
     return math.sqrt((Pc[0] - ground_x)**2 + (Pc[1] - ground_y)**2 + Pc[2]**2)
 
 
+def calculate_real_length(width, height, tall, distance, fx):
+    """
+    카메라와의 거리를 바탕으로 실제 거리 계산
+    """
+    #카메라와 거리 : 초점거리 = 실제 박스크기 : 이미지상 박스크기
+    ratio = fx / distance
+    real_width = round(width * ratio, 2)
+    real_height = round(height * ratio, 2)
+    real_tall = round(tall * ratio, 2)
+
+    return real_width, real_height, real_tall
+
+
 input_path = 'findDot/crops/crop11.png'
 
 #윤곽선만 검출한 이미지 가져오기
@@ -195,12 +208,7 @@ plt.show()
 distance = calculate_distance(rvec, tvec)
 print(distance)
 
-#카메라와 거리 : 초점거리 = 실제 박스크기 : 이미지상 박스크기
-ratio = fx / distance
-width = round(width * ratio, 2)
-height = round(height * ratio, 2)
-tall = round(tall * ratio, 2)
-
-print(width, height, tall)
+w, h, t = calculate_real_length(width, height, tall, distance, fx)
+print(w, h, t)
 
 
