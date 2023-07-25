@@ -9,10 +9,10 @@
 ### Activate Virtual Environment
 
 ```sh
-$ activate_venv.sh
+$ source ./activate_venv.sh
 ```
 
-If you want to deactivate virtual environment, run `deactivate_venv.sh`.
+If you want to deactivate virtual environment, run `deactivate`.
 
 > If Windows, please use `.bat` files.
 
@@ -21,54 +21,8 @@ If you want to deactivate virtual environment, run `deactivate_venv.sh`.
 ```sh
 $ pip install -r requirements.txt
 ```
-<details>
-<summary>segment-anything은 사용하지 않기로 했습니다.</summary>
 
-* ~~[CUDA Toolkit 11.8.0](https://developer.nvidia.com/cuda-11-8-0-download-archive)~~
-* ~~[cuDNN v8.8.0 for CUDA 11.x](https://developer.nvidia.com/rdp/cudnn-archive)~~
-
-> 
-
-
-### Import Model
-
-~~[Download sam_vit_h_4b8939.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth), and place to `/models`.~~
-
-> `sam_vit_h_4b8939.pth` is a model provided by Facebook Research.
-
-</details>
-
-## YOLO v5
-
-### Run
-
-```sh
-$ python yolo/detect.py
-```
-
-### Detail
-
-YOLO v5를 이용한 박스 이미지만 추출하는 코드
-
-추출된 이미지는 /result/exp/crops 에 있습니다.
-
-## nuki
-
-### Run
-
-```sh
-$ python nuki/rem2can.py
-```
-
-### Detail
-
-YOLO v5를 이용해 추출된 이미지를 
-rembg라이브러리를 이용해 배경을 제거하고 
-Canny메소드를 이용해 외곽선만 검출한 코드
-
-추출된 이미지는 nuki/crops 에 있습니다.
-
-## YOLO v8
+## 이미지에서 박스 부분 잘라내기(YOLO v8)
 
 ### Install Module
 
@@ -93,7 +47,23 @@ YOLO v8 커스텀 모델 학습.ipynb파일로 jupyter notebook을 통해
 
 직접 YOLO v8 모델 학습도 가능 합니다.
 
-## findDot
+## 박스 이미지의 배경 제거 및 Edge Detection
+
+### Run
+
+```sh
+$ python nuki/rem2can.py
+```
+
+### Detail
+
+YOLO v5를 이용해 추출된 이미지를 
+rembg라이브러리를 이용해 배경을 제거하고 
+Canny메소드를 이용해 외곽선만 검출한 코드
+
+추출된 이미지는 nuki/crops 에 있습니다.
+
+## 최종 계산
 
 ### Run
 
