@@ -70,6 +70,33 @@ def find_points_from_edges_image(edges):
 
     return points
 
+
+def calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom):
+    #2D 이미지 좌표
+    image_points = np.array([[bottom[0], bottom[1]],
+                            [left_bottom[0], left_bottom[1]],
+                            [right_bottom[0], right_bottom[1]],
+                            [left_top[0], left_top[1]], 
+                            [right_top[0], right_top[1]],
+                            [top[0], top[1]]], 
+                            dtype=np.float32)
+    #3D 좌표계에 생성한 박스 좌표
+    object_points = np.array([[0, 0, 0],
+                            [width, 0, 0],
+                            [0, height, 0],
+                            [width, 0, tall],
+                            [0, height, tall],
+                            [width, height, tall]],
+                            dtype=np.float32)
+    cameraMatrix = np.array([[fx, 0, cx],
+                            [0, fy, cy],
+                            [0, 0, 1]],
+                            dtype=np.float32)
+
+    #외부 파라미터 추정
+    return cv2.solvePnP(object_points, image_points, cameraMatrix, np.zeros(5), flags=cv2.SOLVEPNP_ITERATIVE)
+
+
 input_path = 'findDot/crops/crop11.png'
 
 #윤곽선만 검출한 이미지 가져오기
@@ -78,44 +105,28 @@ edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
 
 points = find_points_from_edges_image(edges)
 
+
 # 찾은 점 시각화
 plt.imshow(edges)
 for x, y in points:
     plt.scatter(x, y, color='red', s=10)
 plt.show()
 
+
 top, bottom, left_top, left_bottom, right_top, right_bottom = classify_points(points)
 
 #이미지 꼭지점 좌표를 토대로 구한 가로, 세로, 높이
 width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
-#2D 이미지 좌표
-image_points = np.array([[bottom[0], bottom[1]],
-                         [left_bottom[0], left_bottom[1]],
-                         [right_bottom[0], right_bottom[1]],
-                         [left_top[0], left_top[1]], 
-                         [right_top[0], right_top[1]],
-                         [top[0], top[1]]], 
-                         dtype=np.float32)
-#3D 좌표계에 생성한 박스 좌표
-object_points = np.array([[0, 0, 0],
-                          [width, 0, 0],
-                          [0, height, 0],
-                          [width, 0, tall],
-                          [0, height, tall],
-                          [width, height, tall]],
-                          dtype=np.float32)
+print(width, height, tall)
 
 #TODO: 카메라의 초점거리와 셀 크기를 알아오는 작업 필요
 fx, fy, cx, cy = 944.4, 944.4, edges.shape[1] / 2, edges.shape[0] / 2
 
-cameraMatrix = np.array([[fx, 0, cx],
-                        [0, fy, cy],
-                        [0, 0, 1]],
-                        dtype=np.float32)
-
 #외부 파라미터 추정
-retval, rvec, tvec = cv2.solvePnP(object_points, image_points, cameraMatrix, np.zeros(5), flags=cv2.SOLVEPNP_ITERATIVE)
+retval, rvec, tvec = calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom)
 
+
+# 시각화용 코드
 # 3D 좌표계 상에서 카메라의 위치와 방향 계산
 rotation_matrix, _ = cv2.Rodrigues(rvec)
 camera_position = -np.dot(rotation_matrix.T, tvec)
@@ -127,12 +138,21 @@ ax = fig.add_subplot(111, projection='3d')
 # 카메라의 위치와 방향 그리기
 ax.quiver(camera_position[0], camera_position[1], camera_position[2], rvec[0], rvec[1], rvec[2])
 
+#3D 좌표계에 생성한 박스 좌표
+object_points = np.array([[0, 0, 0],
+                        [width, 0, 0],
+                        [0, height, 0],
+                        [width, 0, tall],
+                        [0, height, tall],
+                        [width, height, tall]],
+                        dtype=np.float32)
+
 #물체 위치 그리기
 ax.scatter3D(object_points[:, 0], object_points[:, 1], object_points[:, 2])
 
 # 그래프 표시
-print(width, height, tall)
 plt.show()
+
 
 #3D좌표계의 원점을 실제 월드 좌표계의 점으로 변환
 
