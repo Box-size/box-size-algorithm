@@ -33,15 +33,15 @@ def calc_pixel_w_h(top, left, right, bottom):
              math.sqrt((bottom[0] - right_bottom[0])**2 + (bottom[1] - right_bottom[1])**2)) / 2
     height = (math.sqrt((top[0] - right_top[0])**2 + (top[1] - right_top[1])**2) +
              math.sqrt((bottom[0] - left_bottom[0])**2 + (bottom[1] - left_bottom[1])**2)) / 2
-    print(height/width)
     tall = (math.sqrt((left_top[0] - left_bottom[0])**2 + (left_top[1] - left_bottom[1])**2) + 
             math.sqrt((right_top[0] - right_bottom[0])**2 + (right_top[1] - right_bottom[1])**2)) / 2
 
     return width, height, tall
 
 #//////////////////////////////////////
-input_path = 'findDot/crops/crop.png'
+input_path = 'findDot/crops/crop11.png'
 
+#윤곽선만 검출한 이미지 가져오기
 edges = cv2.imread(input_path)
 edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
 
@@ -120,5 +120,46 @@ ax.scatter3D(object_points[:, 0], object_points[:, 1], object_points[:, 2])
 # 그래프 표시
 print(width, height, tall)
 plt.show()
+
+#3D좌표계의 원점을 실제 월드 좌표계의 점으로 변환
+
+#구한 R벡터를 원래 회전정보 행렬로 변환
+Ro, _ = cv2.Rodrigues(rvec)
+
+#3D좌표계의 원점을 구하므로, 카메라 좌표계상 박스 맨 밑점(bottom = 0) 이므로 Pc = tvec
+Pc = tvec
+
+#픽셀좌표의 정규좌표화
+u = (bottom[0] - cx) / fx
+v = (bottom[1] - cy) / fy
+
+#정규좌표상의 bottom 좌표
+p_c = np.array([[u], [v], [1]], dtype=np.float32)
+#카메라 원점의 카메라좌표
+C_c = np.array([[0], [0], [0]], dtype=np.float32)
+#월드좌표상의 bottom 좌표
+p_w = Ro.transpose()@(p_c - tvec)
+#월드좌표상의 카메라 좌표
+C_w = Ro.transpose()@(C_c - tvec)
+
+#지면과 맞닿는 점을 P라 할때, P = C_w + k * (p_w - C_w) 성립,
+#월드좌표계상 지면은 Z = 0이므로 k를 구할 수 있음
+k = -C_w[2]/(p_w[2] - C_w[2])
+
+#지면좌표상의 bottom 좌표
+ground_x = C_w[0] + k*(p_w[0] - C_w[0])
+ground_y = C_w[1] + k*(p_w[1] - C_w[1])
+
+#실제 카메라와의 거리
+distance = math.sqrt((Pc[0] - ground_x)**2 + (Pc[1] - ground_y)**2 + Pc[2]**2)
+print(distance)
+
+#카메라와 거리 : 초점거리 = 실제 박스크기 : 이미지상 박스크기
+ratio = fx / distance
+width = round(width * ratio, 2)
+height = round(height * ratio, 2)
+tall = round(tall * ratio, 2)
+
+print(width, height, tall)
 
 
