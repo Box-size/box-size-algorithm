@@ -2,7 +2,20 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from mpl_toolkits.mplot3d import Axes3D
+
+
+def calculate_box_real_length(edges, fx, fy):
+    """
+    윤곽선만 검출한 이미지와 초점거리(fx, fy)로 박스의 실제 가로 세로 높이를 계산한다.
+    """
+    points = find_points_from_edges_image(edges)
+    top, bottom, left_top, left_bottom, right_top, right_bottom = classify_points(points)
+    width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
+    cx, cy = edges.shape[1] / 2, edges.shape[0] / 2
+    retval, rvec, tvec = calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom, width, height, tall)
+    distance = calculate_distance(rvec, tvec, bottom, fx, fy, cx, cy)
+
+    return calculate_real_length(width, height, tall, distance, fx)
 
 
 def classify_points(points):
@@ -71,7 +84,7 @@ def find_points_from_edges_image(edges):
     return points
 
 
-def calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom):
+def calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom, width, height, tall):
     """
     외부 파라미터 추정
     """
@@ -99,7 +112,7 @@ def calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, rig
     return cv2.solvePnP(object_points, image_points, cameraMatrix, np.zeros(5), flags=cv2.SOLVEPNP_ITERATIVE)
 
 
-def calculate_distance(rvec, tvec):
+def calculate_distance(rvec, tvec, bottom, fx, fy, cx, cy):
     """
     물체와 카메라 사이의 거리 계산
     """
@@ -148,67 +161,82 @@ def calculate_real_length(width, height, tall, distance, fx):
     return real_width, real_height, real_tall
 
 
-input_path = 'findDot/crops/crop11.png'
+def main():
+    input_path = 'findDot/crops/crop11.png'
 
-#윤곽선만 검출한 이미지 가져오기
-edges = cv2.imread(input_path)
-edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
+    #윤곽선만 검출한 이미지 가져오기
+    edges = cv2.imread(input_path)
+    edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
 
-points = find_points_from_edges_image(edges)
-
-
-# 찾은 점 시각화
-plt.imshow(edges)
-for x, y in points:
-    plt.scatter(x, y, color='red', s=10)
-plt.show()
+    points = find_points_from_edges_image(edges)
 
 
-top, bottom, left_top, left_bottom, right_top, right_bottom = classify_points(points)
-
-#이미지 꼭지점 좌표를 토대로 구한 가로, 세로, 높이
-width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
-print(width, height, tall)
-
-#TODO: 카메라의 초점거리와 셀 크기를 알아오는 작업 필요
-fx, fy, cx, cy = 944.4, 944.4, edges.shape[1] / 2, edges.shape[0] / 2
-
-#외부 파라미터 추정
-retval, rvec, tvec = calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom)
+    # 찾은 점 시각화
+    plt.imshow(edges)
+    for x, y in points:
+        plt.scatter(x, y, color='red', s=10)
+    plt.show()
 
 
-# 시각화용 코드
-# 3D 좌표계 상에서 카메라의 위치와 방향 계산
-rotation_matrix, _ = cv2.Rodrigues(rvec)
-camera_position = -np.dot(rotation_matrix.T, tvec)
+    top, bottom, left_top, left_bottom, right_top, right_bottom = classify_points(points)
 
-# 3D 그래프 생성
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+    #이미지 꼭지점 좌표를 토대로 구한 가로, 세로, 높이
+    width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
+    print(width, height, tall)
 
-# 카메라의 위치와 방향 그리기
-ax.quiver(camera_position[0], camera_position[1], camera_position[2], rvec[0], rvec[1], rvec[2])
+    #TODO: 카메라의 초점거리와 셀 크기를 알아오는 작업 필요
+    fx, fy, cx, cy = 944.4, 944.4, edges.shape[1] / 2, edges.shape[0] / 2
 
-#3D 좌표계에 생성한 박스 좌표
-object_points = np.array([[0, 0, 0],
-                        [width, 0, 0],
-                        [0, height, 0],
-                        [width, 0, tall],
-                        [0, height, tall],
-                        [width, height, tall]],
-                        dtype=np.float32)
-
-#물체 위치 그리기
-ax.scatter3D(object_points[:, 0], object_points[:, 1], object_points[:, 2])
-
-# 그래프 표시
-plt.show()
+    #외부 파라미터 추정
+    retval, rvec, tvec = calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom, width, height, tall)
 
 
-distance = calculate_distance(rvec, tvec)
-print(distance)
+    # 시각화용 코드
+    # 3D 좌표계 상에서 카메라의 위치와 방향 계산
+    rotation_matrix, _ = cv2.Rodrigues(rvec)
+    camera_position = -np.dot(rotation_matrix.T, tvec)
 
-w, h, t = calculate_real_length(width, height, tall, distance, fx)
-print(w, h, t)
+    # 3D 그래프 생성
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # 카메라의 위치와 방향 그리기
+    ax.quiver(camera_position[0], camera_position[1], camera_position[2], rvec[0], rvec[1], rvec[2])
+
+    #3D 좌표계에 생성한 박스 좌표
+    object_points = np.array([[0, 0, 0],
+                            [width, 0, 0],
+                            [0, height, 0],
+                            [width, 0, tall],
+                            [0, height, tall],
+                            [width, height, tall]],
+                            dtype=np.float32)
+
+    #물체 위치 그리기
+    ax.scatter3D(object_points[:, 0], object_points[:, 1], object_points[:, 2])
+
+    # 그래프 표시
+    plt.show()
 
 
+    distance = calculate_distance(rvec, tvec, bottom, fx, fy, cx, cy)
+    print(distance)
+
+    w, h, t = calculate_real_length(width, height, tall, distance, fx)
+    print(w, h, t)
+
+
+def main2():
+    input_path = 'findDot/crops/crop11.png'
+
+    #윤곽선만 검출한 이미지 가져오기
+    edges = cv2.imread(input_path)
+    edges = cv2.cvtColor(edges, cv2.COLOR_BGR2GRAY)
+    #TODO: 카메라의 초점거리와 셀 크기를 알아오는 작업 필요
+    fx, fy = 944.4, 944.4
+    w, h, t = calculate_box_real_length(edges, fx, fy)
+    print(w, h, t)
+
+
+if __name__ == "__main__":
+    main()
