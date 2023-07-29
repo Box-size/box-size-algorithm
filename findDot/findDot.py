@@ -176,7 +176,7 @@ def calculate_real_length(width, height, tall, distance, fx):
 def adjust_points(top, bottom, left_top, left_bottom, right_top, right_bottom, away_x, away_y, original, edges):
     #NOTE: 일단 테스트시엔 보기 편하게 이렇게 넣었습니다.
     model = YOLO('yolo-v8/detect_model.pt')
-    source = 'yolo-v8/images/box9.jpg'
+    source = 'yolo-v8/images/test2.jpg'
     results = model(source)
     boxes = results[0].boxes
     box = boxes[0] 
@@ -186,16 +186,11 @@ def adjust_points(top, bottom, left_top, left_bottom, right_top, right_bottom, a
     for point in points:
         new_points.append((point[0] + box.xyxy[0][0], point[1] + box.xyxy[0][1]))
 
-    plt.imshow(original)
-    for x, y in new_points:
-        plt.scatter(x, y, color='red', s=10)
-    plt.show()
-
     return new_points[0], new_points[1], new_points[2], new_points[3], new_points[4], new_points[5]
 
 def main():
-    input_path = 'findDot/crops/crop9.png'
-    original_path = 'yolo-v8/images/box9.jpg'
+    input_path = 'findDot/crops/test2.png'
+    original_path = 'yolo-v8/images/test2.jpg'
     original = cv2.imread(original_path)
     #윤곽선만 검출한 이미지 가져오기
     edges = cv2.imread(input_path)
@@ -219,13 +214,17 @@ def main():
 
     #좌표 조정
     top, bottom, left_top, left_bottom, right_top, right_bottom = adjust_points(top, bottom, left_top, left_bottom, right_top, right_bottom, away_x, away_y, original, edges)
-
+    new_points = [top, bottom, left_top, left_bottom, right_top, right_bottom]
+    plt.imshow(original)
+    for x, y in new_points:
+        plt.scatter(x, y, color='red', s=10)
+    plt.show()
     #이미지 꼭지점 좌표를 토대로 구한 가로, 세로, 높이
     width, height, tall = calc_pixel_w_h(top, bottom, left_top, left_bottom, right_top, right_bottom)
     print(width, height, tall)
 
     #TODO: 카메라의 초점거리와 셀 크기를 알아오는 작업 필요
-    fx, fy, cx, cy = 944.4, 944.4, original.shape[1] / 2, original.shape[0] / 2
+    fx, fy, cx, cy = 4777.7, 4777.7, original.shape[1] / 2, original.shape[0] / 2
 
     #외부 파라미터 추정
     retval, rvec, tvec = calculate_parameters(fx, fy, cx, cy, top, bottom, left_top, left_bottom, right_top, right_bottom, width, height, tall)
